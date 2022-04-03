@@ -20,7 +20,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 handler404 = 'core.views.page_not_found'
-CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+handler500 = 'core.views.server_error'
+handler403 = 'core.views.permission_denied'
 
 urlpatterns = [
     path('', include('posts.urls', namespace='posts')),
