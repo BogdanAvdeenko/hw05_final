@@ -28,11 +28,6 @@ class FollowTests(TestCase):
             text=TEST_POST_TEXT,
         )
 
-        cls.follow = Follow.objects.create(
-            user=cls.user,
-            author=cls.following_author,
-        )
-
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
@@ -57,19 +52,13 @@ class FollowTests(TestCase):
                 author=self.author
             ).exists()
         )
-        # Подписчик видит пост автора
-        subscriber = self.authorized_client.get(reverse('posts:follow_index'))
-        subscriber_can_see_post = subscriber.context.get('page_obj')[0]
-        self.assertEqual(self.post.text, subscriber_can_see_post.text)
-        # Не подписанный не видит пост автора
-        unsubscriber = self.authorized_following_client.get(
-            reverse('posts:follow_index')
-        )
-        subscriber_can_see_post = unsubscriber.context.get('page_obj')
-        self.assertNotEqual(self.post, subscriber_can_see_post)
 
     def test_unfollow(self):
         """Проверка отписки"""
+        self.follow = Follow.objects.create(
+            user=self.user,
+            author=self.following_author,
+        )
         follow_count = Follow.objects.count()
         response = self.authorized_client.post(
             reverse('posts:profile_unfollow', args=[self.following_author]),
@@ -79,3 +68,24 @@ class FollowTests(TestCase):
             args=[self.following_author])
         )
         self.assertEqual(Follow.objects.count(), follow_count - 1)
+
+    def test_subscriber_can_see_authors_post(self):
+        """Подписчик увидит пост автора"""
+        response = self.authorized_client.post(
+            reverse('posts:profile_follow', args=[self.author]),
+        )
+        self.assertRedirects(response, reverse(
+            'posts:profile',
+            args=[self.author])
+        )
+        subscriber = self.authorized_client.get(reverse('posts:follow_index'))
+        subscriber_can_see_post = subscriber.context.get('page_obj')[0]
+        self.assertEqual(self.post.text, subscriber_can_see_post.text)
+
+    def test_unsubscriber_cant_see_authors_post(self):
+        """Не подписанный не увидит пост автора"""
+        unsubscriber = self.authorized_following_client.get(
+            reverse('posts:follow_index')
+        )
+        unsubscriber_cant_see_post = unsubscriber.context.get('page_obj')
+        self.assertNotEqual(self.post, unsubscriber_cant_see_post)

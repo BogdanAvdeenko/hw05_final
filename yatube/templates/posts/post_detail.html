@@ -33,13 +33,13 @@
         <p>
           {{ post.text }}
         </p>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user == post.author %}
           <p>
             <form>
               <button type="submit" class="btn btn-primary" formaction="{% url 'posts:post_edit' post.id %}">Редактировать</button>
             </form>
           </p>
-          {% endif %}
+        {% endif %}
         {% if user.is_authenticated %}
         <div class="card my-4">
           <h5 class="card-header">Добавить комментарий:</h5>
