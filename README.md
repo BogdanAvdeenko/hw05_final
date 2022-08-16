@@ -74,3 +74,6 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+## Автор:
+Богдан Авдеенко. Студент факультета Бэкенд. Когорта №33. Яндекс Практикум.
